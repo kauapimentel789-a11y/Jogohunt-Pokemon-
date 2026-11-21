@@ -14,6 +14,7 @@ Protótipo de jogo idle de hunt no navegador, pensado para celular.
 - Mega Evolução: Pulseira Mega + pedra segurada + Nv 30. A energia enche batendo; dura 45 s.
 - Especial de cada Pokémon: 3 cargas, uma volta a cada 20 s, com cena de corte e efeito por tipo.
 - Arena com combo de 3 golpes, esquiva perfeita em câmera lenta, chefe furioso aos 50% de vida e torre infinita com recorde semanal.
+- Arena vista de cima (estilo arena oval): Liga melhor de 3 contra bot com ranks (Bronze a Mestre) e Chefes difíceis com 3 fases. Botões Atq, Hab, Q, ULT, Esquiva e Evo. Online com outros jogadores ainda não ligado.
 - Arena: luta 1 contra 1 controlada pelo jogador (joystick na tela, controle de videogame ou teclado) contra 16 chefes mega. Os golpes do chefe avisam onde vão cair. A entrada do jogador passa toda por um objeto `INP`, que é o mesmo formato que um PvP online mandaria pela rede.
 
 ## Créditos
