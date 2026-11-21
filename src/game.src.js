@@ -757,7 +757,7 @@ function showAway(R){
     for(const [id,a,b] of R.lv)h+=`<div class="aw"><img src="${portrait(id)}" alt=""><div><b>${S[id].n}</b><div class="sub">Nv ${a} para Nv ${b}</div></div></div>`;
     for(const [a,b] of R.evo)h+=`<div class="aw hi"><img src="${portrait(b)}" alt=""><div><b>${S[a].n} evoluiu para ${S[b].n}</b></div></div>`;
     for(const id of R.shiny)h+=`<div class="aw hi"><img src="${portrait(id,true)}" alt=""><div><b>Shiny capturado: ${S[id].n}</b></div></div>`;
-    for(const f of R.stones)h+=`<div class="aw hi"><img src="${portrait(f)}" alt=""><div><b>Drop: ${stoneN(f)}</b><div class="sub">Segure no ${S[MEGA[f][0]].n} para mega evoluir</div></div></div>`;
+    {const c={};for(const f of R.stones)c[f]=(c[f]||0)+1;for(const f in c)h+=`<div class="aw hi"><img src="${portrait(f)}" alt=""><div><b>Drop: ${c[f]}x ${stoneN(f)}</b><div class="sub">Agora você tem ${G.items.stones[f]}</div></div></div>`}
     if(R.news.length)h+=`<div class="sub" style="margin:8px 0 4px">Novos na Pokédex</div><div class="awgrid">${[...new Set(R.news)].map(id=>`<img src="${portrait(id)}" alt="${S[id].n}" title="${S[id].n}">`).join('')}</div>`;
     if(R.capped)h+=`<p class="note" style="margin-top:8px">O progresso fora do jogo vai até 12 horas.</p>`;
     h+=`<p class="note" style="margin-top:8px">Fora do jogo o time rende 60% do que renderia jogando.</p>`;
@@ -937,26 +937,38 @@ function megaStep(dt,a){if(!a)return;if(a.mega){megaT-=dt;if(megaT<=0)megaOff(a)
 function megaHud(a){const b=$('megaBtn');const show=!!(a&&(a.mega||canMega(a)));b.style.display=show?'flex':'none';if(!show)return;
   b.classList.toggle('ready',!a.mega&&megaE>=100);b.classList.toggle('on',!!a.mega);
   $('megaFill').style.height=(a.mega?100*megaT/MEGA_T:megaE)+'%';b.querySelector('span').textContent=a.mega?Math.ceil(megaT/1000/G.speed)+'s':megaE>=100?'MEGA!':'MEGA'}
-function bossStone(w){const sp=S[w.id].mega||w.id,fs=MEGAS[sp];if(!fs)return null;const free=fs.filter(f=>!G.items.stones[f]);if(!free.length)return null;
-  if(Math.random()>(G.tier>=3?.5:.2))return null;const f=free[Math.floor(Math.random()*free.length)];G.items.stones[f]=1;feed(`Você ganhou: ${stoneN(f)}`);return f}
+// pedras são itens acumuláveis: G.items.stones[forma]=quantidade. Uma fica presa em cada Pokémon que segura; o resto pode ser vendido.
+const addStone=(f,q=1)=>{G.items.stones[f]=(G.items.stones[f]||0)+q};
+const holders=f=>[...G.team,...G.depot].filter(m=>m.hold===f).length;
+const freeStones=f=>Math.max(0,(G.items.stones[f]||0)-holders(f));
+function bossStone(w){const sp=S[w.id].mega||w.id,fs=MEGAS[sp];if(!fs)return null;
+  if(Math.random()>(G.tier>=3?.5:.2))return null;const f=fs[Math.floor(Math.random()*fs.length)];addStone(f);feed(`Você ganhou: ${stoneN(f)}`);return f}
 function megaRow(m){const fs=MEGAS[m.id];if(!fs)return '';const own=fs.filter(f=>G.items.stones[f]);
   let h='<div class="sub" style="margin-top:3px">';
   if(!own.length)h+=`Tem mega: ${fs.map(f=>S[f].n).join(', ')}. A pedra cai de selvagens da linha (5%), chefes, Arena ou Loja.`;
-  else{h+=own.map(f=>m.hold===f?`<b style="color:var(--gold)">Segura ${stoneN(f)}</b>`:`<button class="btn hold" data-hold="${m.u}|${f}">Segurar ${stoneN(f)}</button>`).join(' ');
+  else{h+=own.map(f=>m.hold===f?`<b style="color:var(--gold)">Segura ${stoneN(f)}</b>`:`<button class="btn hold" data-hold="${m.u}|${f}">Segurar ${stoneN(f)} (${G.items.stones[f]})</button>`).join(' ');
     if(m.lvl<MEGA_LV)h+=` Mega a partir do Nv ${MEGA_LV}.`;if(!G.items.ring)h+=' Falta a Pulseira Mega.'}
   return h+'</div>'}
-const RING_P=15000,STONE_P=20000;
+const RING_P=15000,STONE_P=20000,STONE_SELL=1000;
 function megaShop(){let h='<h3>Mega Evolução</h3>';
   h+=`<div class="shop win"><img src="${icon('mega-ring')}" alt=""><div><b>Pulseira Mega</b><div class="sub">${G.items.ring?'Você já tem':'Libera a Mega Evolução. Também sai na 1ª vitória da Arena'}</div></div>${G.items.ring?'':`<button class="btn y" data-buyring="1" ${G.gold<RING_P?'disabled':''}>${RING_P.toLocaleString('pt-BR')}</button>`}</div>`;
+  const own=Object.keys(G.items.stones).map(Number).filter(f=>G.items.stones[f]>0&&MEGA[f]).sort((a,b)=>freeStones(b)-freeStones(a));
+  h+=`<h3>Suas pedras mega</h3>`;
+  if(!own.length)h+='<p class="note">Nenhuma ainda. Elas caem dos selvagens de linhas com mega (5% por abate).</p>';
+  else h+=`<p class="note" style="margin-bottom:6px">Cada Pokémon que segura uma pedra prende uma. As outras você pode vender por ${STONE_SELL.toLocaleString('pt-BR')} cada.</p>`;
+  for(const f of own){const fr=freeStones(f);h+=`<div class="shop win"><img src="${portrait(f)}" alt=""><div><b>${stoneN(f)} x${G.items.stones[f]}</b><div class="sub">${holders(f)?`${holders(f)} em uso, `:''}${fr} livre${fr===1?'':'s'}</div></div><div style="display:flex;gap:4px"><button class="btn" data-sellstone="${f}" ${fr?'':'disabled'}>Vender 1</button>${fr>1?`<button class="btn" data-sellstone="${f}" data-all="1">Todas</button>`:''}</div></div>`}
   const sp=[...new Set([...G.team,...G.depot].map(m=>m.id))].filter(id=>MEGAS[id]);const fs=sp.flatMap(id=>MEGAS[id]).filter(f=>!G.items.stones[f]);
-  if(!fs.length)h+='<p class="note">Pedras aparecem aqui para os Pokémon com mega que você tiver.</p>';
+  if(fs.length)h+='<h3>Comprar pedra</h3>';
   for(const f of fs)h+=`<div class="shop win"><img src="${portrait(f)}" alt=""><div><b>${stoneN(f)}</b><div class="sub">Para ${S[f].n}</div></div><button class="btn y" data-buystone="${f}" ${G.gold<STONE_P?'disabled':''}>${STONE_P.toLocaleString('pt-BR')}</button></div>`;
   return h}
 function megaClick(t,d){
   if(t.id==='megaBtn'){megaOn();return true}
-  if(d.hold){const [u,f]=d.hold.split('|');for(const m of [...G.team,...G.depot]){if(m.hold===+f)delete m.hold}const m=[...G.team,...G.depot].find(x=>x.u===u);if(m){m.hold=+f;toast(`${S[m.id].n} segura ${stoneN(+f)}`)}dirty=true;sheetDirty=true;return true}
+  if(d.hold){const [u,fs]=d.hold.split('|'),f=+fs;const m=[...G.team,...G.depot].find(x=>x.u===u);if(!m)return true;
+    if(freeStones(f)<=0){const o=[...G.depot,...G.team].find(x=>x.hold===f&&x!==m&&!x.mega);if(o)delete o.hold}
+    if(freeStones(f)>0||m.hold===f){if(m.mega)megaOff(m,true);m.hold=f;toast(`${S[m.id].n} segura ${stoneN(f)}`)}dirty=true;sheetDirty=true;return true}
+  if(d.sellstone){const f=+d.sellstone,q=d.all?freeStones(f):Math.min(1,freeStones(f));if(q>0){G.items.stones[f]-=q;G.gold+=q*STONE_SELL;toast(`Vendeu ${q} ${stoneN(f)} por ${(q*STONE_SELL).toLocaleString('pt-BR')}`);snd('catch')}dirty=true;sheetDirty=true;return true}
   if(d.buyring){if(G.gold>=RING_P&&!G.items.ring){G.gold-=RING_P;G.items.ring=true;toast('Pulseira Mega comprada');snd('quest')}dirty=true;return true}
-  if(d.buystone){const f=+d.buystone;if(G.gold>=STONE_P&&!G.items.stones[f]){G.gold-=STONE_P;G.items.stones[f]=1;toast(stoneN(f)+' comprada');snd('quest')}dirty=true;return true}
+  if(d.buystone){const f=+d.buystone;if(G.gold>=STONE_P){G.gold-=STONE_P;addStone(f);toast(stoneN(f)+' comprada');snd('quest')}dirty=true;return true}
   return false}
 
 // ===== entrada: joystick na tela, controle de videogame e teclado =====
@@ -1017,14 +1029,14 @@ function arenaWin(w){if(!AR||AR.over)return;AR.over=true;AR.won=true;const L=AR.
   play(w,'Faint',{cb:()=>{}});w.corpse=w.corpseMax=1e9;w.faintT=0;w.throwing=true;corpses.push(w);
   scrFlash(.5,'#ffcd75');shake=500;snd('quest');burst(w.x,headY(w)+12*SC,'#ffcd75',36,.22);
   if(AR.tower){const n=AR.floor,gold=n*60;G.gold+=gold;towerRec(n);let msg=`Andar ${n} vencido! +${gold.toLocaleString('pt-BR')} de ouro`;
-    if(n%5===0){if(!G.items.stones[L.f]){G.items.stones[L.f]=1;msg+=`, ${stoneN(L.f)}`}else{G.items.rare++;msg+=', 1 Doce raro'}}
+    if(n%5===0){addStone(L.f);msg+=`, ${stoneN(L.f)}`}
     if(a)gainXp(a,Math.floor(L.l*L.l*.8));toast(msg);feed(msg);
     later(1700,()=>{if(!AR||AR.ended)return;corpses=[];WARN=[];ASH=[];AR.floor++;const N=towerL(AR.floor);AR.L=N;AR.t=TOWER_T;AR.over=false;AR.won=false;
       const m=active();if(m)m.hp=Math.min(calc(m).hp,m.hp+calc(m).hp*.35);arenaFoe(N);snd('boss');toast(`Andar ${N.floor}: ${S[N.f].n} Nv ${N.l}`);dirty=true});return}
   const first=!G.arena.wins[L.i];
   const gold=L.l*(first?150:40);G.gold+=gold;G.arena.wins[L.i]=(G.arena.wins[L.i]||0)+1;G.arena.best=Math.max(G.arena.best,L.i+1);
   let msg=`Vitória! +${gold.toLocaleString('pt-BR')} de ouro`;
-  if(first&&!G.items.stones[L.f]){G.items.stones[L.f]=1;msg+=`, ${stoneN(L.f)}`}
+  if(first){addStone(L.f);msg+=`, ${stoneN(L.f)}`}
   if(!G.items.ring){G.items.ring=true;msg+=', Pulseira Mega'}
   if(a){gainXp(a,Math.floor(L.l*L.l*1.5))}
   AR.msg=msg;toast(msg);feed(msg);G.stats.arena=(G.stats.arena||0)+1;
@@ -1042,11 +1054,11 @@ function arenaPanel(){const a=G.team[G.active];let h=`<p class="note">Luta 1 con
   <div class="keys"><b>Celular</b><span>arraste no lado esquerdo para andar, Atacar e Esquivar à direita, golpes na barra de baixo</span><b>Controle</b><span>analógico anda, A ataca, B esquiva, X Y LB RB são os golpes, gatilho mega</span><b>Teclado</b><span>WASD ou setas, J ou espaço ataca, K esquiva, 1 a 4 golpes, E especial, M mega</span></div>
   <p class="note" style="margin-top:8px">Ataque 3 vezes seguidas para o golpe final do combo. Esquivar no último instante deixa tudo lento e enche a mega. Com metade da vida o chefe fica furioso e solta o especial dele.</p>
   <h3 style="margin-top:12px">Torre infinita</h3><div class="arow win"><img src="${icon('black-belt')}" alt=""><div style="min-width:0"><div class="row"><span class="nm">Recorde: andar ${G.tower.best||0}</span></div>
-  <div class="sub">Esta semana: andar ${G.tower.wk===wk()?G.tower.wbest||0:0}. Começa no andar ${Math.floor((G.tower.best||0)/5)*5+1}. A cada 5 andares, pedra mega ou doce raro. Ranking com outros jogadores precisa de servidor.</div></div><button class="btn y" data-tower="1" ${!a||a.hp<=0?'disabled':''}>Subir</button></div>
+  <div class="sub">Esta semana: andar ${G.tower.wk===wk()?G.tower.wbest||0:0}. Começa no andar ${Math.floor((G.tower.best||0)/5)*5+1}. A cada 5 andares, a pedra mega do chefe. Ranking com outros jogadores precisa de servidor.</div></div><button class="btn y" data-tower="1" ${!a||a.hp<=0?'disabled':''}>Subir</button></div>
   <h3 style="margin-top:12px">Desafios</h3>`;
   for(const L of arenaList()){const lock=L.i>G.arena.best,won=G.arena.wins[L.i],st=G.items.stones[L.f];
     h+=`<div class="arow win ${lock?'lock':''} ${won?'won':''}"><img src="${portrait(L.f)}" alt=""><div style="min-width:0"><div class="row"><span class="nm">${L.i+1}. ${S[L.f].n}</span><span class="lv">Nv ${L.l}</span></div>
-      <div class="sub">${won?`Vencido ${won}x. Repetir dá ${(L.l*40).toLocaleString('pt-BR')} de ouro`:`1ª vitória: ${(L.l*150).toLocaleString('pt-BR')} de ouro${st?'':', '+stoneN(L.f)}${!G.items.ring?', Pulseira Mega':''}`}</div></div>
+      <div class="sub">${won?`Vencido ${won}x. Repetir dá ${(L.l*40).toLocaleString('pt-BR')} de ouro`:`1ª vitória: ${(L.l*150).toLocaleString('pt-BR')} de ouro, ${stoneN(L.f)}${!G.items.ring?', Pulseira Mega':''}`}</div></div>
       ${lock?'<span class="sub">Vença o anterior</span>':`<button class="btn y" data-ar="${L.i}" ${!a||a.hp<=0?'disabled':''}>Lutar</button>`}</div>`}
   return h}
 function arenaClick(t,d){if(d.ar!==undefined){arenaStart(+d.ar);return true}if(d.tower){arenaStart(-1,true);return true}if(t.id==='arExit'){arenaEnd(false,'Você saiu da Arena');return true}return false}
@@ -1225,9 +1237,9 @@ function bossUlt(w){const type=S[w.id].t[0],col=FXC[type]||FXC.normal;cutIn(w.id
 // ===== pedras mega caindo dos selvagens: 5% por abate de um Pokémon cuja linha tem mega =====
 const STONE_DROP=.05,MEGA_ROOT={};
 for(const f in MEGA){const r=rootOf(MEGA[f][0]);(MEGA_ROOT[r]||(MEGA_ROOT[r]=[])).push(+f)}
-function mobStone(id,quiet){const fs=(MEGA_ROOT[rootOf(S[id].mega||id)]||[]).filter(f=>!G.items.stones[f]);if(!fs.length||Math.random()>=STONE_DROP)return null;
-  const f=fs[Math.floor(Math.random()*fs.length)];G.items.stones[f]=1;
-  if(!quiet){toast(`Drop: ${stoneN(f)}!`);feed(`${S[id].n} deixou cair ${stoneN(f)}`);snd('quest');if(me)glow(me.x,headY(me)+12*SC,'#ffcd75',40,500)}dirty=true;return f}
+function mobStone(id,quiet){const fs=MEGA_ROOT[rootOf(S[id].mega||id)];if(!fs||Math.random()>=STONE_DROP)return null;
+  const f=fs[Math.floor(Math.random()*fs.length)];addStone(f);
+  if(!quiet){toast(`Drop: ${stoneN(f)}!`);feed(`${S[id].n} deixou cair ${stoneN(f)} (agora ${G.items.stones[f]})`);snd('quest');if(me)glow(me.x,headY(me)+12*SC,'#ffcd75',40,500)}dirty=true;return f}
 
 // ===== HUD =====
 function hpCol(r){return r<.25?'var(--hp-low)':r<.5?'var(--hp-mid)':'var(--hp)'}
