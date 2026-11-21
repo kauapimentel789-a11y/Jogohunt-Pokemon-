@@ -84,6 +84,8 @@ for(const k in D){if(!META[k])continue;const [n,t,s,e]=D[k];S[k]={n,t:t.split('/
 for(const k in S){const e=S[k].e;if(e&&!S[e[0]])S[k].e=null;else if(e)PREV[e[0]]=+k}
 const NSP=Object.keys(S).length;
 // formas mega: entram em S/META com id próprio (o da PokeAPI); sem sprite próprio usam o da espécie
+// evoluções que faltavam (pedra/troca nos jogos, aqui por nível)
+for(const [a,b,l] of [[25,26,30],[37,38,30],[58,59,32],[95,208,40],[123,212,35],[82,462,45]])if(S[a]&&S[b]&&!S[a].e){S[a].e=[b,l];PREV[b]=a}
 const MEGAS={};
 for(const k in MEGA){const [sp,n,t,s,form,spr]=MEGA[k];if(!S[sp]||!META[sp]){delete MEGA[k];continue}
   if(!META[k])META[k]={a:META[sp].a,sh:META[sp].sh,alias:sp};
@@ -669,7 +671,7 @@ function killWild(w,m){
   track('kill',S[w.id].t);track('gold',gold);if(w.boss){G.stats.bosses++;track('boss')}else tutStep(1);
   if(w.boss&&MODE!=='arena'){G.items.rare+=1;G.balls.great+=5;G.balls.ultra+=2;G.pots+=3;shake=400;burst(w.x,w.y-10*SC,'#ffcd75',30,.2);
     const sd=bossStone(w);toast('Chefe derrotado! +1 Doce raro, +5 Great, +2 Ultra'+(sd?', '+MEGA[sd][7]:''));feed(`Chefe ${S[w.id].n} derrotado +${xp}xp +${gold} ouro`)}
-  else{G.boss[bossKey()]=(G.boss[bossKey()]||0)+1;feed(`${S[w.id].n} derrotado +${xp}xp +${gold} ouro`);
+  else{mobStone(w.id);G.boss[bossKey()]=(G.boss[bossKey()]||0)+1;feed(`${S[w.id].n} derrotado +${xp}xp +${gold} ouro`);
     if(G.boss[bossKey()]>=BOSS_N&&!wilds.some(x=>x.boss))later(1500,()=>{if(!wilds.some(x=>x.boss)&&G.boss[bossKey()]>=BOSS_N)spawnBoss()})}
   megaGain(6);gainXp(m,xp);for(const o of G.team)if(o!==m&&o.hp>0)gainXp(o,Math.floor(xp*.25));
   play(w,'Faint',{cb:()=>{}});w.corpse=w.corpseMax=Object.values(G.balls).some(v=>v>0)?30000:5000;w.faintT=0;corpses.push(w);spawnT=Math.max(spawnT,1800);dirty=true;
@@ -728,10 +730,10 @@ function offlineSim(ms){
   const killT=tsum/list.length,lvlF=Math.max(.15,Math.min(1,(a.lvl-avgL+12)/12));
   const kills=Math.min(20000,Math.floor(secs/killT*OFF_EFF*lvlF));
   const before=G.team.map(m=>({u:m.u,id:m.id,lvl:m.lvl}));
-  const R={secs:Math.round(secs),capped:ms>OFF_MAX,kills,xp:0,gold:0,caught:0,merged:0,ups:0,shiny:[],news:[],used:0,evo:[],lv:[]};
+  const R={secs:Math.round(secs),capped:ms>OFF_MAX,kills,xp:0,gold:0,caught:0,merged:0,ups:0,shiny:[],news:[],stones:[],used:0,evo:[],lv:[]};
   SILENT=true;
   for(let i=0;i<kills;i++){const id=pickWild(list),L=lo+Math.floor(Math.random()*(hi-lo+1));
-    R.xp+=Math.floor((40+G.tier*25)*L/5*dexXp());R.gold+=L*5;track('kill',S[id].t);
+    R.xp+=Math.floor((40+G.tier*25)*L/5*dexXp());R.gold+=L*5;track('kill',S[id].t);{const st=mobStone(id,true);if(st)R.stones.push(st)}
     if(G.auto.throw){const k=G.balls[G.auto.ball]>0?G.auto.ball:Object.keys(BALLS).find(x=>G.balls[x]>0);
       if(k){G.balls[k]--;R.used++;if(Math.random()<Math.min(.95,CATCH[G.tier]*BALLS[k].m*([443,246].includes(id)?.5:1))){
         const sh=Math.random()<shinyP(),nw=!G.dex[id];const r=addCapture(id,L,sh,+(0.9+Math.random()*.2).toFixed(2),true);R.caught++;G.stats.caught++;track('catch');
@@ -755,6 +757,7 @@ function showAway(R){
     for(const [id,a,b] of R.lv)h+=`<div class="aw"><img src="${portrait(id)}" alt=""><div><b>${S[id].n}</b><div class="sub">Nv ${a} para Nv ${b}</div></div></div>`;
     for(const [a,b] of R.evo)h+=`<div class="aw hi"><img src="${portrait(b)}" alt=""><div><b>${S[a].n} evoluiu para ${S[b].n}</b></div></div>`;
     for(const id of R.shiny)h+=`<div class="aw hi"><img src="${portrait(id,true)}" alt=""><div><b>Shiny capturado: ${S[id].n}</b></div></div>`;
+    for(const f of R.stones)h+=`<div class="aw hi"><img src="${portrait(f)}" alt=""><div><b>Drop: ${stoneN(f)}</b><div class="sub">Segure no ${S[MEGA[f][0]].n} para mega evoluir</div></div></div>`;
     if(R.news.length)h+=`<div class="sub" style="margin:8px 0 4px">Novos na Pokédex</div><div class="awgrid">${[...new Set(R.news)].map(id=>`<img src="${portrait(id)}" alt="${S[id].n}" title="${S[id].n}">`).join('')}</div>`;
     if(R.capped)h+=`<p class="note" style="margin-top:8px">O progresso fora do jogo vai até 12 horas.</p>`;
     h+=`<p class="note" style="margin-top:8px">Fora do jogo o time rende 60% do que renderia jogando.</p>`;
@@ -938,7 +941,7 @@ function bossStone(w){const sp=S[w.id].mega||w.id,fs=MEGAS[sp];if(!fs)return nul
   if(Math.random()>(G.tier>=3?.5:.2))return null;const f=free[Math.floor(Math.random()*free.length)];G.items.stones[f]=1;feed(`Você ganhou: ${stoneN(f)}`);return f}
 function megaRow(m){const fs=MEGAS[m.id];if(!fs)return '';const own=fs.filter(f=>G.items.stones[f]);
   let h='<div class="sub" style="margin-top:3px">';
-  if(!own.length)h+=`Tem mega: ${fs.map(f=>S[f].n).join(', ')}. A pedra sai na Arena, em chefes ou na Loja.`;
+  if(!own.length)h+=`Tem mega: ${fs.map(f=>S[f].n).join(', ')}. A pedra cai de selvagens da linha (5%), chefes, Arena ou Loja.`;
   else{h+=own.map(f=>m.hold===f?`<b style="color:var(--gold)">Segura ${stoneN(f)}</b>`:`<button class="btn hold" data-hold="${m.u}|${f}">Segurar ${stoneN(f)}</button>`).join(' ');
     if(m.lvl<MEGA_LV)h+=` Mega a partir do Nv ${MEGA_LV}.`;if(!G.items.ring)h+=' Falta a Pulseira Mega.'}
   return h+'</div>'}
@@ -1218,6 +1221,13 @@ function bossUlt(w){const type=S[w.id].t[0],col=FXC[type]||FXC.normal;cutIn(w.id
       for(let i=0;i<8;i++){const x=cam+VW*(i+.5)/8;later(i*40,()=>shots.push({k:'boom',type,x,y:z.y-12*SC,r:24*SC,t:0,dur:480}))}
       shake=Math.max(shake,600);scrFlash(.4,col[0]);if(inZone(z,me))applyHit(w,false,me,type,140,{})});
     warn({k:'circ',x:w.x,y:w.y,r:62*SC,dur:950},z=>{shots.push({k:'aoe',type,x:z.x,y:z.y,r:z.r,t:0,dur:520});if(inZone(z,me))applyHit(w,false,me,type,110,{})})})}
+
+// ===== pedras mega caindo dos selvagens: 5% por abate de um Pokémon cuja linha tem mega =====
+const STONE_DROP=.05,MEGA_ROOT={};
+for(const f in MEGA){const r=rootOf(MEGA[f][0]);(MEGA_ROOT[r]||(MEGA_ROOT[r]=[])).push(+f)}
+function mobStone(id,quiet){const fs=(MEGA_ROOT[rootOf(S[id].mega||id)]||[]).filter(f=>!G.items.stones[f]);if(!fs.length||Math.random()>=STONE_DROP)return null;
+  const f=fs[Math.floor(Math.random()*fs.length)];G.items.stones[f]=1;
+  if(!quiet){toast(`Drop: ${stoneN(f)}!`);feed(`${S[id].n} deixou cair ${stoneN(f)}`);snd('quest');if(me)glow(me.x,headY(me)+12*SC,'#ffcd75',40,500)}dirty=true;return f}
 
 // ===== HUD =====
 function hpCol(r){return r<.25?'var(--hp-low)':r<.5?'var(--hp-mid)':'var(--hp)'}
