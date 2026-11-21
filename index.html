@@ -174,6 +174,17 @@ body.arena #megaBtn{top:auto;bottom:102px;right:12px;min-width:78px}
 .keys b{color:var(--gold)}
 .hold{padding:3px 6px!important;font-size:12px!important;margin-top:4px}
 
+#spBtn{position:absolute;right:6px;top:66px;display:none;flex-direction:column;align-items:stretch;gap:3px;padding:4px 6px 5px;max-width:118px;z-index:2;overflow:hidden;text-align:left}
+#spBtn b{font-size:10.5px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative;z-index:1}
+#spBtn small{font-size:10px;color:var(--gold);position:relative;z-index:1}
+#spBtn .pips{display:flex;gap:3px;position:relative;z-index:1}
+#spBtn .pips i{width:12px;height:7px;background:var(--edge);border:1px solid var(--edge)}
+#spBtn .pips i.on{background:var(--gold);box-shadow:0 0 4px var(--gold)}
+#spFill{position:absolute;left:0;bottom:0;height:3px;width:0;background:#73eff7}
+#spBtn.empty{opacity:.6}
+body.arena #spBtn{top:auto;bottom:102px;right:98px;max-width:96px}
+body.arena #megaBtn{bottom:150px}
+
 @media (prefers-reduced-motion:reduce){#sheet{transition:none}}
 </style>
 </head>
@@ -193,6 +204,7 @@ body.arena #megaBtn{top:auto;bottom:102px;right:12px;min-width:78px}
     <div id="feed"></div>
     <div id="coach" class="win"><span id="coachTxt"></span><button class="btn" id="coachSkip">Pular</button></div>
     <button id="throw" class="btn y"><img class="ico" id="icThrow" alt=""><span id="throwTxt"></span></button>
+    <button id="spBtn" class="btn" aria-label="Especial"><b></b><span class="pips"></span><i id="spFill"></i></button>
     <button id="megaBtn" class="btn" aria-label="Mega evoluir"><img class="ico" id="icMega" alt=""><span>MEGA</span><i id="megaFill"></i></button>
     <div id="pad"></div>
     <div id="center"></div>
@@ -238,7 +250,7 @@ body.arena #megaBtn{top:auto;bottom:102px;right:12px;min-width:78px}
     finally{done++;el.querySelector('i').style.width=(100*done/IDS.length)+'%'}}
   (async()=>{const q=[...IDS];await Promise.all(Array.from({length:16},async()=>{while(q.length)await one(q.shift())}));
     if(!Object.keys(META).length){el.querySelector('p').textContent='Não foi possível carregar os sprites. Confira a internet e recarregue a página.';return}
-    el.remove();const s=document.createElement('script');s.src='game.js?v=3';document.body.appendChild(s)})();
+    el.remove();const s=document.createElement('script');s.src='game.js?v=4';document.body.appendChild(s)})();
 })();
 </script>
 </body>

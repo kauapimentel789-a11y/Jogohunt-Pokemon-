@@ -12,6 +12,8 @@ Protótipo de jogo idle de hunt no navegador, pensado para celular.
 - Hunt idle em visão lateral, com cenário em camadas por bioma (Floresta, Vulcão, Lago, Usina, Caverna) e 4 faixas de nível.
 - 285 espécies e 93 formas mega/primal. As formas mega usam sprite próprio do PMD Collab quando existe; as outras usam o sprite da espécie com aura.
 - Mega Evolução: Pulseira Mega + pedra segurada + Nv 30. A energia enche batendo; dura 45 s.
+- Especial de cada Pokémon: 3 cargas, uma volta a cada 20 s, com cena de corte e efeito por tipo.
+- Arena com combo de 3 golpes, esquiva perfeita em câmera lenta, chefe furioso aos 50% de vida e torre infinita com recorde semanal.
 - Arena: luta 1 contra 1 controlada pelo jogador (joystick na tela, controle de videogame ou teclado) contra 16 chefes mega. Os golpes do chefe avisam onde vão cair. A entrada do jogador passa toda por um objeto `INP`, que é o mesmo formato que um PvP online mandaria pela rede.
 
 ## Créditos
