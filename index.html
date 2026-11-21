@@ -36,14 +36,14 @@ img{image-rendering:pixelated}
 .btn.y:active{box-shadow:inset 2px 2px 0 #c9884a,inset -2px -2px 0 #fff3c4}
 .ico{width:24px;height:24px;flex:none}
 
-#app{height:100dvh;max-width:720px;margin:0 auto;display:grid;grid-template-rows:auto 1fr auto auto;padding:env(safe-area-inset-top,0) env(safe-area-inset-right,0) 0 env(safe-area-inset-left,0)}
+#app{height:100dvh;max-width:1000px;margin:0 auto;display:grid;grid-template-rows:auto 1fr auto auto;padding:env(safe-area-inset-top,0) env(safe-area-inset-right,0) 0 env(safe-area-inset-left,0)}
 /* barra de cima */
-#top{display:flex;align-items:center;gap:10px;padding:6px 8px;margin:6px 6px 0}
+#top{display:flex;align-items:center;gap:8px;padding:4px 6px;margin:4px 4px 0}
 #area{font-weight:700;font-size:16px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #area small{display:block;font-weight:400;font-size:12px;color:var(--mute)}
 .stat{display:flex;align-items:center;gap:2px;font-weight:700;font-size:15px}
 /* palco */
-#stage{position:relative;overflow:hidden;margin:6px 6px 0;border:2px solid var(--edge);min-height:0;touch-action:manipulation}
+#stage{position:relative;overflow:hidden;margin:4px 4px 0;border:2px solid var(--edge);min-height:0;touch-action:manipulation}
 #cv{position:absolute;inset:0;width:100%;height:100%;display:block}
 #target{position:absolute;left:6px;top:6px;display:none;align-items:center;gap:8px;padding:5px 8px 5px 5px;max-width:62%}
 #target img{width:40px;height:40px;background:var(--win-lo);border:2px solid var(--edge)}
@@ -68,9 +68,9 @@ img{image-rendering:pixelated}
 #center{position:absolute;inset:0;display:none;place-items:center;background:rgba(14,15,29,.78);text-align:center;font-weight:700;font-size:20px;z-index:3}
 #center small{display:block;font-size:14px;font-weight:400;color:var(--mute);margin-top:6px}
 /* hud */
-#hud{margin:6px 6px 0;padding:8px;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
-#act{display:grid;grid-template-columns:56px 1fr;gap:4px 10px;align-items:center;min-width:0}
-#actPic{grid-row:1/4;width:56px;height:56px;background:var(--win-lo);border:2px solid var(--edge)}
+#hud{margin:4px 4px 0;padding:6px;display:grid;grid-template-columns:1fr auto;gap:6px 8px;align-items:center}
+#act{display:grid;grid-template-columns:44px 1fr;gap:4px 10px;align-items:center;min-width:0}
+#actPic{grid-row:1/4;width:44px;height:44px;background:var(--win-lo);border:2px solid var(--edge)}
 #actPic img{width:100%;height:100%;display:block}
 .row{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-weight:700;min-width:0}
 .row span:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -81,25 +81,25 @@ img{image-rendering:pixelated}
 .sub{font-size:12px;color:var(--mute);font-weight:400}
 #team{display:flex;gap:4px}
 #moves{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
-.mv{position:relative;overflow:hidden;padding:7px 4px 6px 9px;text-align:left;font-size:12px;font-weight:700;line-height:1.1;min-height:44px}
+.mv{position:relative;overflow:hidden;padding:5px 4px 4px 8px;text-align:left;font-size:11.5px;font-weight:700;line-height:1.1;min-height:38px}
 .mv .ty{position:absolute;left:0;top:0;bottom:0;width:4px}
-.mv small{display:block;font-weight:400;color:var(--mute);font-size:11px;margin-top:3px}
+.mv small{display:block;font-weight:400;color:var(--mute);font-size:10.5px;margin-top:2px}
 .mv .cdv{position:absolute;left:0;right:0;bottom:0;height:0;background:rgba(14,15,29,.72);pointer-events:none}
 .mv .s{position:absolute;right:4px;bottom:4px;font-size:13px;color:var(--gold)}
 .mv.on{box-shadow:inset 0 0 0 2px var(--gold)}
 .mv[disabled]{opacity:.5}
-.mini{width:38px;position:relative}
-.mini img{width:38px;height:38px;display:block;background:var(--win-lo);border:2px solid var(--edge)}
+.mini{width:34px;position:relative}
+.mini img{width:34px;height:34px;display:block;background:var(--win-lo);border:2px solid var(--edge)}
 .mini .bar{height:5px;border-width:1px;margin-top:2px}
 .mini.ko img{filter:grayscale(1) brightness(.5)}
 .mini.on img{border-color:var(--gold)}
 /* abas */
-#tabs{position:relative;z-index:6;display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin:6px 6px 0;padding-bottom:calc(6px + env(safe-area-inset-bottom,0px))}
-.tab{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0 5px;font-size:13px;font-weight:700}
-.tab img{width:26px;height:26px}
+#tabs{position:relative;z-index:6;display:grid;grid-template-columns:repeat(6,1fr);gap:3px;margin:4px 4px 0;padding-bottom:calc(6px + env(safe-area-inset-bottom,0px))}
+.tab{display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 0 3px;font-size:12px;font-weight:700;min-width:0}
+.tab img{width:22px;height:22px}
 .tab[aria-selected=true]{background:var(--gold);color:var(--ink);box-shadow:inset 2px 2px 0 #fff3c4,inset -2px -2px 0 #c9884a}
 /* painel de baixo */
-#sheet{position:fixed;left:0;right:0;bottom:var(--tabsH,72px);max-width:720px;margin:0 auto;max-height:72dvh;display:flex;flex-direction:column;transform:translateY(105%);transition:transform .22s cubic-bezier(.2,.8,.2,1),visibility .22s;z-index:5;visibility:hidden}
+#sheet{position:fixed;left:0;right:0;bottom:var(--tabsH,72px);max-width:1000px;margin:0 auto;max-height:72dvh;display:flex;flex-direction:column;transform:translateY(105%);transition:transform .22s cubic-bezier(.2,.8,.2,1),visibility .22s;z-index:5;visibility:hidden}
 #sheet.open{transform:none;visibility:visible}
 #sheetHead{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:2px solid var(--edge);font-weight:700;font-size:18px}
 #sheetBody{overflow-y:auto;overscroll-behavior:contain;padding:10px 12px 14px}
@@ -147,6 +147,33 @@ h3:first-child{margin-top:0}
 .pick img{width:64px;height:64px}
 @media (hover:hover) and (pointer:fine){.btn:hover{filter:brightness(1.1)}.pick:hover{filter:brightness(1.15)}}
 @media (min-width:600px){#hud{padding:10px}#act{grid-template-columns:64px 1fr}#actPic{width:64px;height:64px}.mini,.mini img{width:48px}.mini img{height:48px}}
+/* mega */
+#megaBtn{position:absolute;right:6px;top:6px;display:none;flex-direction:column;align-items:center;gap:0;padding:4px 6px 3px;font-size:11px;font-weight:700;overflow:hidden;z-index:2;min-width:52px}
+#megaBtn span{position:relative;z-index:1}
+#megaBtn .ico{position:relative;z-index:1;width:22px;height:22px}
+#megaFill{position:absolute;left:0;right:0;bottom:0;height:0;background:#5d275d;z-index:0}
+#megaBtn.ready{background:var(--gold);color:var(--ink);animation:megaP .7s steps(2) infinite}
+#megaBtn.ready #megaFill{display:none}
+#megaBtn.on #megaFill{background:#b13e53}
+@keyframes megaP{50%{box-shadow:inset 2px 2px 0 #fff3c4,inset -2px -2px 0 #c9884a,0 0 0 3px #f4f4f4}}
+@media (prefers-reduced-motion:reduce){#megaBtn.ready{animation:none}}
+/* arena */
+#pad{position:absolute;inset:0;display:none;z-index:1;touch-action:none;user-select:none;-webkit-user-select:none}
+#joy{position:absolute;left:0;bottom:0;width:58%;height:70%}
+.pbtn{position:absolute;display:grid;place-items:center;font-weight:700;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+#bAtk{right:12px;bottom:14px;width:78px;height:78px;font-size:15px}
+#bDodge{right:98px;bottom:18px;width:62px;height:62px;font-size:12px}
+#arExit{position:absolute;right:6px;top:6px;padding:5px 9px;font-size:12px}
+body.arena #feed{display:none}
+body.arena #megaBtn{top:auto;bottom:102px;right:12px;min-width:78px}
+.arow{display:grid;grid-template-columns:44px 1fr auto;gap:10px;align-items:center;padding:6px 8px;margin-bottom:6px}
+.arow img{width:44px;height:44px;background:var(--win-lo);border:2px solid var(--edge)}
+.arow.lock{opacity:.5}
+.arow.won .nm{color:var(--gold)}
+.keys{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:13px;margin-top:6px}
+.keys b{color:var(--gold)}
+.hold{padding:3px 6px!important;font-size:12px!important;margin-top:4px}
+
 @media (prefers-reduced-motion:reduce){#sheet{transition:none}}
 </style>
 </head>
@@ -166,6 +193,8 @@ h3:first-child{margin-top:0}
     <div id="feed"></div>
     <div id="coach" class="win"><span id="coachTxt"></span><button class="btn" id="coachSkip">Pular</button></div>
     <button id="throw" class="btn y"><img class="ico" id="icThrow" alt=""><span id="throwTxt"></span></button>
+    <button id="megaBtn" class="btn" aria-label="Mega evoluir"><img class="ico" id="icMega" alt=""><span>MEGA</span><i id="megaFill"></i></button>
+    <div id="pad"></div>
     <div id="center"></div>
   </main>
 
@@ -184,6 +213,7 @@ h3:first-child{margin-top:0}
     <button class="tab win" role="tab" data-tab="hunt" aria-selected="true"><img alt="" id="icHunt">Hunt</button>
     <button class="tab win" role="tab" data-tab="mapa" aria-selected="false"><img alt="" id="icMap">Mapa</button>
     <button class="tab win" role="tab" data-tab="equipe" aria-selected="false"><img alt="" id="icTeam">Equipe</button>
+    <button class="tab win" role="tab" data-tab="arena" aria-selected="false"><img alt="" id="icArena">Arena</button>
     <button class="tab win" role="tab" data-tab="loja" aria-selected="false"><img alt="" id="icShop">Loja</button>
     <button class="tab win" role="tab" data-tab="ajustes" aria-selected="false"><img alt="" id="icCfg">Ajustes</button>
   </nav>
@@ -196,10 +226,10 @@ h3:first-child{margin-top:0}
 <div id="boot" style="position:fixed;inset:0;z-index:20;background:var(--ink);display:grid;place-items:center"><div class="win" style="padding:16px;width:min(320px,86vw)"><p style="font-weight:700;margin-bottom:10px">Carregando Pokémon...</p><div class="bar"><i style="width:0%;background:var(--gold)"></i></div></div></div>
 <script>
 (function(){
-  const IDS=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 25, 26, 37, 38, 43, 44, 45, 54, 55, 58, 59, 74, 75, 76, 77, 78, 81, 82, 95, 111, 112, 123, 125, 126, 129, 130, 131, 134, 135, 152, 153, 154, 155, 156, 157, 158, 159, 160, 179, 180, 181, 183, 184, 194, 195, 208, 212, 214, 218, 219, 228, 229, 246, 247, 248, 252, 253, 254, 255, 256, 257, 258, 259, 260, 320, 321, 324, 350, 387, 388, 389, 390, 391, 392, 393, 394, 395, 403, 404, 405, 418, 419, 443, 444, 445, 462, 479, 495, 496, 497, 498, 499, 500, 501, 502, 503, 524, 525, 540, 541, 542, 595, 596, 650, 651, 652, 653, 654, 655, 656, 657, 658, 667, 668, 672, 673, 722, 723, 724, 725, 726, 727, 728, 729, 730, 744, 745, 757, 758, 761, 762, 763, 810, 811, 812, 813, 814, 815, 816, 817, 818, 835, 836, 850, 851, 906, 907, 908, 909, 910, 911, 912, 913, 914],R='https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/sprite/';
+  const IDS=[[1, "0001/"], [2, "0002/"], [3, "0003/"], [4, "0004/"], [5, "0005/"], [6, "0006/"], [7, "0007/"], [8, "0008/"], [9, "0009/"], [10, "0010/"], [11, "0011/"], [12, "0012/"], [13, "0013/"], [14, "0014/"], [15, "0015/"], [16, "0016/"], [17, "0017/"], [18, "0018/"], [25, "0025/"], [26, "0026/"], [35, "0035/"], [36, "0036/"], [37, "0037/"], [38, "0038/"], [43, "0043/"], [44, "0044/"], [45, "0045/"], [54, "0054/"], [55, "0055/"], [58, "0058/"], [59, "0059/"], [63, "0063/"], [64, "0064/"], [65, "0065/"], [69, "0069/"], [70, "0070/"], [71, "0071/"], [74, "0074/"], [75, "0075/"], [76, "0076/"], [77, "0077/"], [78, "0078/"], [79, "0079/"], [80, "0080/"], [81, "0081/"], [82, "0082/"], [92, "0092/"], [93, "0093/"], [94, "0094/"], [95, "0095/"], [111, "0111/"], [112, "0112/"], [115, "0115/"], [120, "0120/"], [121, "0121/"], [123, "0123/"], [125, "0125/"], [126, "0126/"], [127, "0127/"], [129, "0129/"], [130, "0130/"], [131, "0131/"], [134, "0134/"], [135, "0135/"], [142, "0142/"], [147, "0147/"], [148, "0148/"], [149, "0149/"], [150, "0150/"], [152, "0152/"], [153, "0153/"], [154, "0154/"], [155, "0155/"], [156, "0156/"], [157, "0157/"], [158, "0158/"], [159, "0159/"], [160, "0160/"], [179, "0179/"], [180, "0180/"], [181, "0181/"], [183, "0183/"], [184, "0184/"], [194, "0194/"], [195, "0195/"], [208, "0208/"], [212, "0212/"], [214, "0214/"], [218, "0218/"], [219, "0219/"], [227, "0227/"], [228, "0228/"], [229, "0229/"], [246, "0246/"], [247, "0247/"], [248, "0248/"], [252, "0252/"], [253, "0253/"], [254, "0254/"], [255, "0255/"], [256, "0256/"], [257, "0257/"], [258, "0258/"], [259, "0259/"], [260, "0260/"], [280, "0280/"], [281, "0281/"], [282, "0282/"], [302, "0302/"], [303, "0303/"], [304, "0304/"], [305, "0305/"], [306, "0306/"], [307, "0307/"], [308, "0308/"], [309, "0309/"], [310, "0310/"], [318, "0318/"], [319, "0319/"], [320, "0320/"], [321, "0321/"], [322, "0322/"], [323, "0323/"], [324, "0324/"], [333, "0333/"], [334, "0334/"], [350, "0350/"], [353, "0353/"], [354, "0354/"], [358, "0358/"], [359, "0359/"], [361, "0361/"], [362, "0362/"], [371, "0371/"], [372, "0372/"], [373, "0373/"], [374, "0374/"], [375, "0375/"], [376, "0376/"], [380, "0380/"], [381, "0381/"], [382, "0382/"], [383, "0383/"], [384, "0384/"], [387, "0387/"], [388, "0388/"], [389, "0389/"], [390, "0390/"], [391, "0391/"], [392, "0392/"], [393, "0393/"], [394, "0394/"], [395, "0395/"], [396, "0396/"], [397, "0397/"], [398, "0398/"], [403, "0403/"], [404, "0404/"], [405, "0405/"], [418, "0418/"], [419, "0419/"], [427, "0427/"], [428, "0428/"], [443, "0443/"], [444, "0444/"], [445, "0445/"], [448, "0448/"], [459, "0459/"], [460, "0460/"], [462, "0462/"], [475, "0475/"], [478, "0478/"], [479, "0479/"], [485, "0485/"], [491, "0491/"], [495, "0495/"], [496, "0496/"], [497, "0497/"], [498, "0498/"], [499, "0499/"], [500, "0500/"], [501, "0501/"], [502, "0502/"], [503, "0503/"], [524, "0524/"], [525, "0525/"], [529, "0529/"], [530, "0530/"], [531, "0531/"], [540, "0540/"], [541, "0541/"], [542, "0542/"], [543, "0543/"], [544, "0544/"], [545, "0545/"], [559, "0559/"], [560, "0560/"], [595, "0595/"], [596, "0596/"], [602, "0602/"], [603, "0603/"], [604, "0604/"], [607, "0607/"], [608, "0608/"], [609, "0609/"], [622, "0622/"], [623, "0623/"], [650, "0650/"], [651, "0651/"], [652, "0652/"], [653, "0653/"], [654, "0654/"], [655, "0655/"], [656, "0656/"], [657, "0657/"], [658, "0658/"], [667, "0667/"], [668, "0668/"], [669, "0669/"], [670, "0670/"], [672, "0672/"], [673, "0673/"], [677, "0677/"], [678, "0678/"], [686, "0686/"], [687, "0687/"], [688, "0688/"], [689, "0689/"], [690, "0690/"], [691, "0691/"], [701, "0701/"], [718, "0718/"], [719, "0719/"], [722, "0722/"], [723, "0723/"], [724, "0724/"], [725, "0725/"], [726, "0726/"], [727, "0727/"], [728, "0728/"], [729, "0729/"], [730, "0730/"], [739, "0739/"], [740, "0740/"], [744, "0744/"], [745, "0745/"], [757, "0757/"], [758, "0758/"], [761, "0761/"], [762, "0762/"], [763, "0763/"], [767, "0767/"], [768, "0768/"], [780, "0780/"], [801, "0801/"], [807, "0807/"], [810, "0810/"], [811, "0811/"], [812, "0812/"], [813, "0813/"], [814, "0814/"], [815, "0815/"], [816, "0816/"], [817, "0817/"], [818, "0818/"], [835, "0835/"], [836, "0836/"], [850, "0850/"], [851, "0851/"], [870, "0870/"], [906, "0906/"], [907, "0907/"], [908, "0908/"], [909, "0909/"], [910, "0910/"], [911, "0911/"], [912, "0912/"], [913, "0913/"], [914, "0914/"], [951, "0951/"], [952, "0952/"], [969, "0969/"], [970, "0970/"], [978, "0978/"], [996, "0996/"], [997, "0997/"], [998, "0998/"], [10034, "0006/0001/"], [10037, "0065/0001/"], [10038, "0094/0001/"], [10039, "0115/0001/"], [10042, "0142/0001/"], [10044, "0150/0002/"], [10048, "0229/0001/"], [10049, "0248/0001/"], [10051, "0282/0001/"], [10052, "0303/0001/"], [10054, "0308/0001/"], [10055, "0310/0001/"], [10056, "0354/0001/"], [10057, "0359/0001/"], [10059, "0448/0001/"], [10062, "0380/0001/"], [10063, "0381/0001/"], [10065, "0254/0001/"], [10066, "0302/0001/"], [10067, "0334/0001/"], [10068, "0475/0001/"], [10070, "0319/0001/"], [10071, "0080/0002/"], [10072, "0208/0001/"], [10074, "0362/0001/"], [10075, "0719/0001/"], [10077, "0382/0001/"], [10078, "0383/0001/"], [10079, "0384/0001/"], [10087, "0323/0001/"], [10088, "0428/0001/"], [10284, "0227/0001/"], [10287, "0530/0001/"], [10289, "0560/0001/"], [10290, "0604/0001/"], [10296, "0670/0006/"], [10299, "0691/0001/"], [10300, "0701/0001/"], [10301, "0718/0005/"], [10302, "0780/0001/"], [10306, "0358/0001/"], [10312, "0491/0002/"], [10319, "0807/0001/"], [10322, "0978/0003/"]],R='https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/sprite/';
   const WANT={Idle:['Idle'],Walk:['Walk','Idle'],Atk:['Attack','Strike','Shoot','Swing','Double','Hop','Charge'],Faint:['Faint','Sleep','Laying','Hurt']};
   window.META={};let done=0;const el=document.getElementById('boot');
-  async function one(id){try{const r=await fetch(R+String(id).padStart(4,'0')+'/AnimData.xml');if(!r.ok)return;
+  async function one([id,dir]){try{const r=await fetch(R+dir+'AnimData.xml');if(!r.ok)return;
     const x=new DOMParser().parseFromString(await r.text(),'text/xml'),an={};x.querySelectorAll('Anim').forEach(a=>{const n=a.querySelector('Name');if(n)an[n.textContent]=a});
     const res=(n,d)=>{const a=an[n];if(!a)return null;const c=a.querySelector('CopyOf');return c&&d<5?res(c.textContent,d+1):[n,a]};
     const g=(a,s)=>{const e=a.querySelector(s);return e?+e.textContent:-1};const out={};
@@ -208,7 +238,7 @@ h3:first-child{margin-top:0}
     finally{done++;el.querySelector('i').style.width=(100*done/IDS.length)+'%'}}
   (async()=>{const q=[...IDS];await Promise.all(Array.from({length:16},async()=>{while(q.length)await one(q.shift())}));
     if(!Object.keys(META).length){el.querySelector('p').textContent='Não foi possível carregar os sprites. Confira a internet e recarregue a página.';return}
-    el.remove();const s=document.createElement('script');s.src='game.js?v=2';document.body.appendChild(s)})();
+    el.remove();const s=document.createElement('script');s.src='game.js?v=3';document.body.appendChild(s)})();
 })();
 </script>
 </body>

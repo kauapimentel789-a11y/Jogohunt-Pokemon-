@@ -7,6 +7,13 @@ Protótipo de jogo idle de hunt no navegador, pensado para celular.
 - Para gerar o `game.js` de novo depois de editar o código-fonte:
   `npx terser src/game.src.js -c passes=3,toplevel -m toplevel -o game.js`
 
+## O que tem
+
+- Hunt idle em visão lateral, com cenário em camadas por bioma (Floresta, Vulcão, Lago, Usina, Caverna) e 4 faixas de nível.
+- 285 espécies e 93 formas mega/primal. As formas mega usam sprite próprio do PMD Collab quando existe; as outras usam o sprite da espécie com aura.
+- Mega Evolução: Pulseira Mega + pedra segurada + Nv 30. A energia enche batendo; dura 45 s.
+- Arena: luta 1 contra 1 controlada pelo jogador (joystick na tela, controle de videogame ou teclado) contra 16 chefes mega. Os golpes do chefe avisam onde vão cair. A entrada do jogador passa toda por um objeto `INP`, que é o mesmo formato que um PvP online mandaria pela rede.
+
 ## Créditos
 
 Fan game sem fins lucrativos. Pokémon e todos os nomes relacionados pertencem à Nintendo, Game Freak e The Pokémon Company.
