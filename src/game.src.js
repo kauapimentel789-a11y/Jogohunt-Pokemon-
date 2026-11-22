@@ -266,8 +266,11 @@ function frame(e){if(e.av&&!META[e.id].a[e.av])e.av=null;const m=META[e.id].a[e.
   if(!e.once)t%=tot;else if(t>=tot){if(e.hitCb&&!e.hitDone){e.hitDone=true;e.hitCb()}if(e.cb){const c=e.cb;e.cb=null;c()}else if(e.anim!=='Faint')play(e,'Idle');return m[3].length-1}
   let acc=0;for(let i=0;i<m[3].length;i++){acc+=m[3][i]*1000/60;if(t<acc){const hf=m[4]>=0?m[4]:Math.floor(m[3].length*.5);if(e.once&&e.hitCb&&!e.hitDone&&i>=hf){e.hitDone=true;e.hitCb()}return i}}return m[3].length-1}
 function drawEnt(e,dim){
-  if(e.av&&!META[e.id].a[e.av])e.av=null;const m=META[e.id].a[e.av||e.anim],im=sheet(e.id,e.shiny,e.av||e.anim);if(!im.complete||!im.naturalWidth)return;
-  const f=frame(e),rows=Math.max(1,Math.round(im.naturalHeight/m[2])),row=rows>1?e.dir:0;
+  if(e.av&&!META[e.id].a[e.av])e.av=null;let m=META[e.id].a[e.av||e.anim],im=sheet(e.id,e.shiny,e.av||e.anim),fb=false;const rdy=i=>i&&i.complete&&i.naturalWidth;
+  if((e.team===0||e===me)&&e.preId!==e.id+'|'+e.shiny){e.preId=e.id+'|'+e.shiny;for(const r in META[e.id].a)sheet(e.id,e.shiny,r)}
+  if(!rdy(im)){fb=true;let ok=false;for(const r of [e.anim,'Idle','Walk'])for(const s of [e.shiny,false]){if(ok||!META[e.id].a[r])continue;const i2=sheet(e.id,s,r);if(rdy(i2)){im=i2;m=META[e.id].a[r];ok=true}}
+    if(!ok){if(e.lastId===e.id&&rdy(e.lastIm)){im=e.lastIm;m=e.lastM}else return}}else{e.lastIm=im;e.lastM=m;e.lastId=e.id}
+  const f=fb?frame(e)%m[3].length:frame(e),rows=Math.max(1,Math.round(im.naturalHeight/m[2])),row=rows>1?e.dir:0;
   const K=(e.scale||1)*(META[e.id].alias?1.15:1),sq=e.sq||0,w=m[1]*SC*K*(1+.14*sq),h=m[2]*SC*K*(1-.12*sq),fy=foot(e.id)*SC*K;
   const lx=e.lunge>0?Math.sin((1-e.lunge/220)*Math.PI)*7*SC*(e.dir===6?-1:1):0;
   ctx.save();ctx.globalAlpha=dim?.75:.35;ctx.fillStyle='#0e0f1d';ctx.beginPath();ctx.ellipse(e.x,e.y,9*SC*K,3.2*SC*K,0,0,7);ctx.fill();ctx.restore();
@@ -1728,10 +1731,7 @@ function axPadHud(){if(!AX||!AX.P)return;const p=AX.P,set=(id,frac,txt,dis)=>{co
 function axStatsRow(id){const c=calc({id,lvl:50,q:1}),bar=(n,v,mx,col)=>`<div class="sb"><span>${n}</span><i><b style="width:${Math.min(100,v/mx*100)}%;background:${col}"></b></i><em>${Math.round(v)}</em></div>`;
   return bar('PS',c.hp*7,1400,'#38b764')+bar('Atq',c.atk,260,'#ef7d57')+bar('Def',c.def,260,'#41a6f6')+bar('Vel',c.spe,240,'#ffcd75')}
 function axPanel(){const m=axPickMon();if(!m)return '<p class="note">Escolha um Pokémon inicial primeiro.</p>';G.rank=G.rank||{pts:0,w:0,l:0,streak:0};const R=rankOf(G.rank.pts),ri=AX_RANKS.indexOf(R),nx=AX_RANKS[ri+1];
-  const mv=axMoves(m.id,m.lvl),all=[...G.team,...G.depot].sort((a,b)=>b.lvl-a.lvl);
-  let h=`<div class="axsel">${all.slice(0,40).map(o=>`<button class="axp${o.u===m.u?' on':''}" data-axpick="${o.u}" aria-label="${S[o.id].n}"><img src="${portrait(o.id,o.shiny)}" alt=""><span>${o.lvl}</span></button>`).join('')}</div>
-  <div class="axcard win"><div class="row"><span class="nm">${S[m.id].n}</span><span class="lv">${S[m.id].t.join(' / ')}</span></div>${axStatsRow(m.id)}
-   <div class="axmv"><b>Atq</b><span>${RANGED.has(S[m.id].t[0])?'Tiro':'Corpo a corpo'} de ${S[m.id].t[0]}, combo de 3</span><b>Hab</b><span>${mv.hab?MV[mv.hab][0]:'-'}</span><b>Q</b><span>${mv.q?MV[mv.q][0]:'-'}</span><b>ULT</b><span>${spName(m.id)}</span>${MEGAS[m.id]?`<b>Evo</b><span>${m.hold&&G.items.stones[m.hold]&&G.items.ring?S[m.hold].n:'Precisa de pedra e Pulseira'}</span>`:''}</div></div>
+  let h=axPicker(true)+`
   <h3>Liga</h3><div class="arow win"><span class="rk" style="background:${R[2]}">${R[0][0]}</span><div style="min-width:0"><div class="row"><span class="nm">${R[0]}, ${G.rank.pts} pontos</span></div>
    <div class="sub">${G.rank.w} vitórias, ${G.rank.l} derrotas${nx?`. ${nx[1]-G.rank.pts} para ${nx[0]}`:''}. Melhor de 3, nível 50 para todos. Vitória +25 (mais em sequência), derrota -15.</div></div><button class="btn y" data-axgo="liga">Lutar!</button></div>
   <p class="note" style="margin:4px 0 10px">Por enquanto o rival é o computador, que fica mais esperto a cada rank. O online com outros jogadores entra quando ligarmos o servidor.</p>
@@ -1741,7 +1741,7 @@ function axPanel(){const m=axPickMon();if(!m)return '<p class="note">Escolha um 
       <div class="sub">${won?`Vencido ${won}x`:`Prêmio: ${(L.l*200).toLocaleString('pt-BR')} de ouro e ${stoneN(L.f)}`}</div></div>${lock?'<span class="sub">Vença o anterior</span>':`<button class="btn y" data-axgo="boss" data-b="${L.i}">Lutar</button>`}</div>`}
     h+=`<div class="keys" style="margin-top:10px"><b>Celular</b><span>arraste à esquerda para andar; Atq, Hab, Q, ULT, Esq (esquiva) e Evo (mega) à direita</span><b>Controle</b><span>analógico anda, A Atq, X Hab, Y Q, gatilho direito ULT, B esquiva, gatilho esquerdo Evo</span><b>Teclado</b><span>WASD, J Atq, 1 Hab, 2 Q, E ULT, K esquiva, M Evo</span></div>`;
   return h}
-function axClick(t,d){if(d.surv){axStart('surv',d.surv);return true}if(d.rift){if(riftKeys()<1)return toast('Sem chave da Fenda'),true;G.rift.k--;axStart('rift');return true}if(d.hm){const [b,i]=d.hm.split('|');axStart('hunt',{b,i:+i,map:b==='lago'?'neve':b});return true}if(d.axpick){G.axPick=d.axpick;sheetDirty=true;return true}if(d.axgo){if(d.axgo==='liga')axStart('liga');else axStart('boss',+d.b);return true}return false}
+function axClick(t,d){if(d.surv){axStart('surv',d.surv);return true}if(d.rift){if(riftKeys()<1)return toast('Sem chave da Fenda'),true;G.rift.k--;axStart('rift');return true}if(d.hm){const [b,i]=d.hm.split('|');axStart('hunt',{b,i:+i,map:b==='lago'?'neve':b});return true}if(d.axpick){axPickUI(d.axpick);return true}if(d.axgo){if(d.axgo==='liga')axStart('liga');else axStart('boss',+d.b);return true}return false}
 
 const svCd=f=>AX&&AX.mode==='surv'&&f.team===0&&AX.sv?Math.max(.4,1-.12*(AX.sv.up.cd||0)):1;
 
@@ -1999,6 +1999,16 @@ function survPanel(){const b=G.surv&&G.surv.best?Math.floor(G.surv.best/1000):0;
     h+=`<div class="mcard win sv-${k}"><div style="min-width:0"><div class="row"><span class="nm">${n}</span></div><div class="sub">${d}</div><div class="who">${ids.map(id=>`<img src="${portrait(id)}" alt="">`).join('')}</div></div><button class="btn y" data-surv="${k}">Jogar</button></div>`}
   return h}
 function fendaPanel(){return riftPanel()+`<p class="note" style="margin-top:8px">O lendário da Fenda é o desafio mais difícil do jogo. Ele tem 3 fases, ataques que cobrem a arena e chama ajudantes. Leve seu Pokémon mais forte.</p>`}
+// ===== escolher o Pokémon que vai lutar (Arena, Na mão, Survival, Fenda) =====
+function axPickList(){const tm=G.team.slice(),dp=G.depot.slice().sort((a,b)=>b.lvl-a.lvl||(b.b||0)-(a.b||0));return [...tm,...dp].slice(0,60)}
+function axPickCard(m,full){const mv=axMoves(m.id,m.lvl);
+  if(!full)return `<div class="axcard win pkc"><img src="${portrait(m.id,m.shiny)}" alt=""><div><b>${S[m.id].n} Nv ${m.lvl}${m.b?' +'+m.b:''}</b><div class="sub">Hab: ${mv.hab?MV[mv.hab][0]:'-'}. Q: ${mv.q?MV[mv.q][0]:'-'}. ULT: ${spName(m.id)}</div></div></div>`;
+  return `<div class="axcard win"><div class="row"><span class="nm">${S[m.id].n} Nv ${m.lvl}</span><span class="lv">${S[m.id].t.join(' / ')}</span></div>${axStatsRow(m.id)}
+   <div class="axmv"><b>Atq</b><span>${RANGED.has(S[m.id].t[0])?'Tiro':'Corpo a corpo'} de ${S[m.id].t[0]}, combo de 3</span><b>Hab</b><span>${mv.hab?MV[mv.hab][0]:'-'}</span><b>Q</b><span>${mv.q?MV[mv.q][0]:'-'}</span><b>ULT</b><span>${spName(m.id)}</span>${MEGAS[m.id]?`<b>Evo</b><span>${m.hold&&G.items.stones[m.hold]&&G.items.ring?S[m.hold].n:'Precisa de pedra e Pulseira'}</span>`:''}</div></div>`}
+function axPicker(full){const m=axPickMon();if(!m)return '';const nt=G.team.length;
+  return `<div class="pkhead"><b>Quem vai lutar</b><span class="sub">Toque para trocar</span></div><div class="axsel" id="axSel">${axPickList().map((o,i)=>`${i===nt&&i?'<i class="pksep">Depot</i>':''}<button class="axp${o.u===m.u?' on':''}${i<nt?' tm':''}" data-axpick="${o.u}" aria-label="${S[o.id].n} Nv ${o.lvl}" aria-pressed="${o.u===m.u}"><img src="${portrait(o.id,o.shiny)}" alt=""><span>Nv ${o.lvl}</span></button>`).join('')}</div><div id="axCardBox" data-full="${full?1:0}">${axPickCard(m,full)}</div>`}
+function axPickUI(u){G.axPick=u;const m=axPickMon();for(const b of document.querySelectorAll('[data-axpick]')){const on=b.dataset.axpick===u;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)}
+  const box=$('axCardBox');if(box&&m)box.innerHTML=axPickCard(m,box.dataset.full==='1');snd('quest');dirty=true}
 
 // ===== HUD =====
 function hpCol(r){return r<.25?'var(--hp-low)':r<.5?'var(--hp-mid)':'var(--hp)'}
@@ -2051,7 +2061,7 @@ function monRow(m,i,inTeam){const c=calc(m);return `<div class="mon win"><img sr
 const sellPrice=m=>Math.floor(m.lvl*25*m.q*(m.shiny?10:1));
 function renderSheet(){
   $('sheetTitle').textContent=TITLES[openTab];const B=$('sheetBody');let h=MODE_KEYS.has(openTab)?modeNav(openTab):'';
-  if(openTab==='mao')h+=maoPanel();if(openTab==='surv')h+=survPanel();if(openTab==='fenda')h+=fendaPanel();
+  if(openTab==='mao')h+=axPicker(false)+maoPanel();if(openTab==='surv')h+=axPicker(false)+survPanel();if(openTab==='fenda')h+=axPicker(false)+fendaPanel();
   if(openTab==='missoes'){const D=daily();
     h+='<h3>Missões de hoje</h3>'+D.list.map((q,i)=>`<div class="quest win ${q.claimed?'done':''}"><div class="row"><span>${q.n}</span><span class="lv">${q.p.toLocaleString('pt-BR')}/${q.g.toLocaleString('pt-BR')}</span></div><div class="bar"><i style="width:${100*q.p/q.g}%;background:var(--gold)"></i></div><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span class="sub">Prêmio: ${rwText(q.rw)}</span>${q.claimed?'<span class="sub">Pego</span>':q.done?`<button class="btn y" data-qd="${i}">Pegar</button>`:''}</div></div>`).join('')+'<p class="note">Novas missões à meia-noite.</p>';
     const open=METAS.filter(m=>!G.metas[m.id]),got=METAS.length-open.length;
@@ -2079,7 +2089,7 @@ function renderSheet(){
       <p class="note" style="margin-top:8px">Sprites e retratos: <a href="https://sprites.pmdcollab.org/" style="color:var(--gold)">PMD Collab</a>, sob a licença CC BY-NC 4.0, com sprites originais da Spike Chunsoft. Artistas: ${CREDITS}.</p>
       <p class="note" style="margin-top:8px">Ícones de itens: projeto <a href="https://github.com/PokeAPI/sprites" style="color:var(--gold)">PokeAPI</a>. Fonte Pixelify Sans, licença SIL OFL.</p></div>
       <p class="note" style="margin-top:10px">Toque num selvagem para escolher o alvo, num corpo para jogar a bola e num golpe da barra para usá-lo. Sprites e retratos do PMD Collab, só para teste interno.</p>`}
-  B.innerHTML=h;
+  {const ox=$('axSel'),st=ox?ox.scrollTop:0;B.innerHTML=h;const nx=$('axSel');if(nx)nx.scrollTop=st}
 }
 
 // ===== interação =====
