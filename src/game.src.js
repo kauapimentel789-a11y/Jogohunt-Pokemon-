@@ -2145,6 +2145,78 @@ function mapPanel(kind){const T=trInit(),cur=kind==='auto'?G.biome:(G.mapSel||G.
         ${op?(kind==='auto'?(isCur?'<span class="here">Aqui</span>':`<button class="btn y" data-go="${b}|${i}">Ir</button>`):`<button class="btn y" data-hm="${b}|${i}">Caçar</button>`):`<span class="sub lockt">Treinador Nv ${rq}</span>`}</div>`}).join('')+'</div>'}
     h+='</div>'}
   return h}
+// ===== Equipe: time, coleção por categoria, ficha do Pokémon e confirmação de venda =====
+const TU={cat:'all',sort:'lvl',sel:null,open:null};
+const RAR_ORDER=['n','s','m','l','sm','sml'];
+const CAT_NAMES={all:'Todos',n:'Normal',s:'Shiny',m:'Mítico',l:'Lendário',sm:'Shiny Mega',sml:'S. M. Lendário'};
+const RAR_PRICE={0:1,1:10,2:25,3:40,4:100};
+const allMons=()=>[...G.team,...G.depot];
+const monByU=u=>allMons().find(m=>m.u===u);
+function teamPanel(){const col=G.depot,cnt={all:col.length};for(const m of col){const k=rarOf(m);cnt[k]=(cnt[k]||0)+1}
+  if(TU.cat!=='all'&&!cnt[TU.cat])TU.cat='all';
+  let h=`<div class="tsum"><div><b>${Object.keys(G.dex).length}</b><span>Pokédex de ${NSP}</span></div><div><b>${allMons().length}</b><span>Pokémon seus</span></div><div><b>${G.items.rare}</b><span>Doces raros</span></div></div>`;
+  h+=`<div class="sech"><b>Seu time</b><span class="sub">${G.team.length} de 5. Toque para ver e trocar</span></div><div class="tgrid">`;
+  G.team.forEach((m,i)=>{const c=calc(m),k=rarOf(m);h+=`<button class="tcard rb-${k} ${i===G.active?'on':''}" data-mon="${m.u}" aria-label="${S[m.id].n} Nv ${m.lvl}"><img src="${portrait(m.id,m.shiny)}" alt=""><span class="tn">${S[m.id].n}</span><span class="tl">Nv ${m.lvl}${m.b?` +${m.b}`:''}</span><i class="hpb"><u style="width:${100*m.hp/c.hp}%;background:${hpCol(m.hp/c.hp)}"></u></i>${i===G.active?'<em>Em campo</em>':''}</button>`});
+  for(let i=G.team.length;i<5;i++)h+=`<div class="tcard empty"><span>Vaga livre</span></div>`;
+  h+=`</div><div class="sech"><b>Coleção</b><span class="sub">${col.length} guardados. O que você captura com o time cheio vem para cá</span></div>`;
+  h+=`<div class="chips" role="tablist">${['all',...RAR_ORDER].filter(k=>k==='all'||cnt[k]).map(k=>`<button class="chip ck-${k}" data-cat="${k}" aria-pressed="${TU.cat===k}">${CAT_NAMES[k]} <b>${cnt[k]||0}</b></button>`).join('')}</div>`;
+  h+=`<div class="ctools"><div class="seg">${[['lvl','Nível'],['rar','Raridade'],['new','Recentes'],['name','Nome']].map(([k,l])=>`<button class="btn" data-sort="${k}" aria-pressed="${TU.sort===k}">${l}</button>`).join('')}</div>${col.length?`<button class="btn ${TU.sel?'y':''}" data-selmode="1">${TU.sel?'Cancelar':'Vender vários'}</button>`:''}</div>`;
+  let L=col.map((m,i)=>[m,i]).filter(([m])=>TU.cat==='all'||rarOf(m)===TU.cat);
+  const rk=m=>RAR[rarOf(m)].rk;
+  if(TU.sort==='lvl')L.sort((a,b)=>b[0].lvl-a[0].lvl||rk(b[0])-rk(a[0]));else if(TU.sort==='rar')L.sort((a,b)=>rk(b[0])-rk(a[0])||b[0].lvl-a[0].lvl);else if(TU.sort==='name')L.sort((a,b)=>S[a[0].id].n.localeCompare(S[b[0].id].n));
+  if(!col.length)h+=`<p class="note empty-note">Sua coleção está vazia. Quando o time estiver com 5, as próximas capturas ficam guardadas aqui.</p>`;
+  else if(!L.length)h+=`<p class="note">Nenhum Pokémon nesta categoria.</p>`;
+  else{h+=`<div class="cgrid">`+L.map(([m])=>{const k=rarOf(m),sel=TU.sel&&TU.sel.has(m.u);return `<button class="ctile rb-${k} ${sel?'sel':''}" data-mon="${m.u}" aria-pressed="${!!sel}" aria-label="${S[m.id].n} Nv ${m.lvl} ${RAR[k].n}"><img src="${portrait(m.id,m.shiny)}" alt="" loading="lazy"><span>Nv ${m.lvl}</span>${k!=='n'?`<i class="rdot rt-${k}"></i>`:''}${sel?'<em>✓</em>':''}</button>`}).join('')+`</div>`}
+  if(TU.sel){const ms=[...TU.sel].map(monByU).filter(Boolean),v=ms.reduce((a,m)=>a+sellPrice(m),0);
+    h+=`<div class="selbar win"><span>${ms.length} selecionado${ms.length===1?'':'s'}<br><b>${v.toLocaleString('pt-BR')} de ouro</b></span><button class="btn" data-selall="1">Todos normais</button><button class="btn red" data-sellsel="1" ${ms.length?'':'disabled'}>Vender</button></div>`}
+  h+=`<p class="note" style="margin-top:10px">Fundir um Pokémon repetido da mesma linha dá bônus de +1 a +5. Cada nível de bônus soma 8% em HP, ataque e defesa.</p>`;
+  return h}
+// ---- ficha ----
+function monDlg(u){TU.open=u;let el=$('monDlg');if(!el){el=document.createElement('div');el.id='monDlg';el.className='dlg';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');$('app').appendChild(el);
+    el.addEventListener('click',e=>{if(e.target===el){closeMonDlg();return}const b=e.target.closest('button');if(b)setTimeout(()=>TU.open&&monDlg(TU.open),0)})}
+  const m=monByU(u);if(!m){closeMonDlg();return}const ti=G.team.indexOf(m),di=G.depot.indexOf(m),c=calc(m),k=rarOf(m),b=baseStats(m.id);
+  const st=(l,v,mx)=>`<div class="st"><span>${l}</span><i><u style="width:${Math.min(100,100*v/mx)}%"></u></i><b>${Math.round(v)}</b></div>`;
+  const nx=nextMoves(m)[0];
+  el.innerHTML=`<div class="dbox win rb-${k}"><button class="dx" data-closedlg="1" aria-label="Fechar">✕</button>
+   <div class="dtop"><img src="${portrait(m.id,m.shiny)}" alt=""><div><div>${rarTag(m)}</div><h2>${S[m.id].n} <small>Nv ${m.lvl}${m.b?` +${m.b}`:''}</small></h2><div class="tys">${S[m.id].t.map(t=>`<span class="ty" style="background:${TYPE_COLOR[t]}">${t}</span>`).join('')}</div>
+   <div class="sub">${ti>=0?(ti===G.active?'Em campo agora':'No seu time'):'Na coleção'}</div></div></div>
+   <div class="dbars"><div class="st"><span>HP</span><i><u style="width:${100*m.hp/c.hp}%;background:${hpCol(m.hp/c.hp)}"></u></i><b>${Math.ceil(m.hp)}/${c.hp}</b></div>
+    <div class="st"><span>XP</span><i><u style="width:${m.lvl>=100?100:100*m.xp/need(m.lvl)}%;background:#41a6f6"></u></i><b>${m.lvl>=100?'máx':Math.floor(100*m.xp/need(m.lvl))+'%'}</b></div></div>
+   <div class="dsec"><b>Atributos</b>${st('Ataque',c.atk,400)}${st('Defesa',c.def,400)}${st('Velocid.',b[3],160)}<div class="sub">Qualidade ${m.q.toFixed(2)}${(m.b||0)<5?`. Fusão ${m.bx||0}/${BNEED[m.b||0]} para o próximo bônus`:'. Fusão máxima'}</div></div>
+   <div class="dsec"><b>Golpes</b><div class="mvl">${movesOf(m).map(x=>`<span class="mvc" style="border-color:${TYPE_COLOR[MV[x][1]]}">${MV[x][0]}</span>`).join('')}</div>${nx?`<div class="sub">Próximo: ${MV[nx[0]][0]} no Nv ${nx[1]}</div>`:''}${S[m.id].e?`<div class="sub">Evolui para ${S[S[m.id].e[0]].n} no Nv ${S[m.id].e[1]}</div>`:''}</div>
+   ${MEGAS[m.id]?`<div class="dsec"><b>Mega</b>${megaRow(m)}</div>`:''}
+   <div class="dacts">${ti>=0?`${ti!==G.active?`<button class="btn y" data-sw="${ti}" ${m.hp<=0?'disabled':''}>Colocar em campo</button>`:''}${G.team.length>1?`<button class="btn" data-dep="${ti}">Guardar na coleção</button>`:''}${G.items.rare>0&&m.lvl<100?`<button class="btn" data-rare="${ti}">Doce raro (${G.items.rare})</button>`:''}`
+    :`<button class="btn y" data-up="${di}" ${G.team.length>=5?'disabled':''}>${G.team.length>=5?'Time cheio':'Levar para o time'}</button>${mergeTarget(m)?`<button class="btn" data-merge="${di}">Fundir com ${S[mergeTarget(m).id].n}</button>`:''}<button class="btn red" data-asksell="${m.u}">Vender por ${sellPrice(m).toLocaleString('pt-BR')}</button>`}</div></div>`;
+  el.classList.add('on')}
+function closeMonDlg(){TU.open=null;const el=$('monDlg');if(el)el.classList.remove('on');sheetDirty=true}
+// ---- confirmação ----
+function confirmDlg(o){let el=$('cfmDlg');if(!el){el=document.createElement('div');el.id='cfmDlg';el.className='dlg';el.setAttribute('role','alertdialog');el.setAttribute('aria-modal','true');$('app').appendChild(el)}
+  el.innerHTML=`<div class="cbox win"><h3>${o.title}</h3><div class="cbody">${o.body}</div>${o.warn?`<p class="cwarn">${o.warn}</p>`:''}<div class="cacts"><button class="btn" id="cfmNo">Cancelar</button><button class="btn ${o.danger?'red':'y'}" id="cfmYes">${o.ok}</button></div></div>`;
+  el.classList.add('on');const close=()=>el.classList.remove('on');
+  $('cfmNo').onclick=close;el.onclick=e=>{if(e.target===el)close()};$('cfmYes').onclick=()=>{close();o.onOk()};setTimeout(()=>$('cfmNo').focus(),30)}
+function doSell(list){let v=0,n=0;for(const m of list){const i=G.depot.indexOf(m);if(i<0)continue;v+=sellPrice(m);G.depot.splice(i,1);n++}
+  if(!n)return;G.gold+=v;toast(`Vendeu ${n} Pokémon por ${v.toLocaleString('pt-BR')} de ouro`);snd('catch');TU.sel=null;closeMonDlg();dirty=true;sheetDirty=true;renderNow()}
+function askSell(list){list=list.filter(m=>G.depot.includes(m));if(!list.length)return;const v=list.reduce((a,m)=>a+sellPrice(m),0),rare=list.filter(m=>RAR[rarOf(m)].rk>0);
+  const one=list.length===1?list[0]:null;
+  confirmDlg({title:one?`Vender ${S[one.id].n}?`:`Vender ${list.length} Pokémon?`,
+    body:(one?`<div class="cone"><img src="${portrait(one.id,one.shiny)}" alt=""><span>${rarTag(one)}${S[one.id].n} Nv ${one.lvl}</span></div>`:`<div class="cmany">${list.slice(0,12).map(m=>`<img src="${portrait(m.id,m.shiny)}" alt="${S[m.id].n}">`).join('')}${list.length>12?`<span>+${list.length-12}</span>`:''}</div>`)+`<p>Você recebe <b>${v.toLocaleString('pt-BR')} de ouro</b>.</p>`,
+    warn:rare.length?`Atenção: ${one?'este Pokémon é':rare.length===1?'um destes é':`${rare.length} destes são`} ${[...new Set(rare.map(m=>RAR[rarOf(m)].n))].join(', ')}. Raros são difíceis de conseguir de novo.`:'Esta ação não pode ser desfeita.',
+    ok:'Vender',danger:true,onOk:()=>doSell(list)})}
+function renderNow(){if(openTab){const SB=$('sheetBody'),st=SB.scrollTop;renderSheet();SB.scrollTop=st}}
+function teamClick(t,d){
+  if(d.sellstone&&!t._ok){const f=+d.sellstone,q=d.all?freeStones(f):Math.min(1,freeStones(f));if(q<=0)return true;
+    confirmDlg({title:`Vender ${q>1?q+' pedras':'pedra'}?`,body:`<div class="cone"><img src="${portrait(f)}" alt=""><span>${stoneN(f)} x${q}</span></div><p>Você recebe <b>${(q*STONE_SELL).toLocaleString('pt-BR')} de ouro</b>.</p>`,warn:'Pedras mega são raras. Esta ação não pode ser desfeita.',ok:'Vender',danger:true,onOk:()=>{t._ok=1;megaClick(t,d);t._ok=0;dirty=true;renderNow()}});return true}
+  if(d.closedlg){closeMonDlg();return true}
+  if(d.mon){const u=d.mon;if(TU.sel&&G.depot.some(m=>m.u===u)){TU.sel.has(u)?TU.sel.delete(u):TU.sel.add(u);renderNow()}else monDlg(u);return true}
+  if(d.cat){TU.cat=d.cat;renderNow();return true}
+  if(d.sort){TU.sort=d.sort;renderNow();return true}
+  if(d.selmode){TU.sel=TU.sel?null:new Set();renderNow();return true}
+  if(d.selall){for(const m of G.depot)if(rarOf(m)==='n'&&(TU.cat==='all'||TU.cat==='n'))TU.sel.add(m.u);renderNow();return true}
+  if(d.sellsel){askSell([...TU.sel].map(monByU).filter(Boolean));return true}
+  if(d.asksell){const m=monByU(d.asksell);if(m)askSell([m]);return true}
+  return false}
+
+document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;const c=$('cfmDlg');if(c&&c.classList.contains('on')){c.classList.remove('on');return}if(TU.open)closeMonDlg()});
 
 // ===== HUD =====
 function hpCol(r){return r<.25?'var(--hp-low)':r<.5?'var(--hp-mid)':'var(--hp)'}
@@ -2194,7 +2266,7 @@ function monRow(m,i,inTeam){const c=calc(m);return `<div class="mon win"><img sr
   <div class="sub">${S[m.id].t.join(' / ')}, qualidade ${m.q.toFixed(2)}${(m.b||0)<5?`, fusão ${m.bx||0}/${BNEED[m.b||0]}`:', fusão máxima'}</div><div class="sub" style="margin-top:3px;color:var(--cream)">${movesOf(m).map(k=>MV[k][0]).join(', ')}</div>${megaRow(m)}${(()=>{const n=nextMoves(m)[0];return n?`<div class="sub">Próximo: ${MV[n[0]][0]} no Nv ${n[1]}</div>`:''})()}</div>
   <div class="acts">${inTeam?`${i===G.active?'<span class="sub" style="text-align:center">Em campo</span>':`<button class="btn" data-sw="${i}" ${m.hp<=0?'disabled':''}>Usar</button>`}${G.team.length>1?`<button class="btn" data-dep="${i}">Guardar</button>`:''}${G.items.rare>0&&m.lvl<100?`<button class="btn y" data-rare="${i}">Doce raro</button>`:''}`
   :`<button class="btn" data-up="${i}" ${G.team.length>=5?'disabled':''}>Equipe</button>${mergeTarget(m)?`<button class="btn y" data-merge="${i}">Fundir</button>`:''}<button class="btn" data-sell="${i}">${sellPrice(m)}</button>`}</div></div>`}
-const sellPrice=m=>Math.floor(m.lvl*25*m.q*(m.shiny?10:1));
+const sellPrice=m=>Math.floor(m.lvl*25*m.q*RAR_PRICE[RAR[rarOf(m)].rk]);
 function renderSheet(){
   $('sheetTitle').textContent=TITLES[openTab];const B=$('sheetBody');let h=MODE_KEYS.has(openTab)?modeNav(openTab):'';
   if(openTab==='mao')h+=axPicker(false)+maoPanel();if(openTab==='surv')h+=axPicker(false)+survPanel();if(openTab==='fenda')h+=axPicker(false)+fendaPanel();
@@ -2204,14 +2276,12 @@ function renderSheet(){
     h+=`<h3>Metas</h3>`+open.slice(0,5).map(m=>{const ok=m.ok();return `<div class="quest win"><div class="row"><span>${m.n}</span></div><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:4px"><span class="sub">Prêmio: ${rwText(m.rw)}</span>${ok?`<button class="btn y" data-qm="${m.id}">Pegar</button>`:''}</div></div>`}).join('')+(got?`<p class="note">${got} de ${METAS.length} metas concluídas.</p>`:'');
     const n=dexN(),tier=dexTier();h+=`<h3>Pokédex</h3><div class="quest win"><div class="row"><span>${n} espécies registradas</span><span class="lv">de ${NSP}</span></div><div class="bar"><i style="width:${100*(n%10)/10}%;background:var(--xp)"></i></div><span class="sub">Bônus atual: +${tier*2}% de XP e +${tier*10}% de chance de shiny. Próximo marco em ${10-n%10} ${10-n%10>1?'espécies':'espécie'}.</span></div>`}
   if(openTab==='mapa'){h+=`<div class="intro win"><b>Caça automática</b><p>Escolha onde seu time caça sozinho. Continua rendendo mesmo com o jogo fechado. Novos mapas e faixas abrem com o nível do treinador.</p></div>`+mapPanel('auto')}
-  if(openTab==='equipe'){h+=`<h3>Equipe ${G.team.length}/5</h3>`+G.team.map((m,i)=>monRow(m,i,true)).join('');
-    h+=`<h3>Depot ${G.depot.length}</h3>`+(G.depot.length?G.depot.map((m,i)=>monRow(m,i,false)).join(''):'<p class="note">Vazio. O que você capturar com a equipe cheia vem para cá.</p>');
-    h+=`<p class="note" style="margin-top:10px">Pokédex: ${Object.keys(G.dex).length} de ${NSP}. Abates: ${G.kills}. Doces raros: ${G.items.rare}.</p><p class="note" style="margin-top:6px">Fundir um Pokémon repetido da mesma linha dá bônus de +1 a +5. Cada nível de bônus soma 8% em HP, ataque e defesa.</p>`}
+  if(openTab==='equipe')h+=teamPanel();
   if(openTab==='arena')h+=axPanel();
-  if(openTab==='loja'){h+=`<p class="note" style="margin-bottom:8px">Você tem ${Math.floor(G.gold).toLocaleString('pt-BR')} de ouro.</p>`;
+  if(openTab==='loja'){h+=`<div class="tsum"><div><b>${Math.floor(G.gold).toLocaleString('pt-BR')}</b><span>Ouro</span></div><div><b>${Object.values(G.balls).reduce((a,b)=>a+b,0)}</b><span>Bolas</span></div><div><b>${G.pots}</b><span>Poções</span></div></div><h3>Bolas e poções</h3>`;
     for(const k in BALLS)h+=`<div class="shop win"><img src="${icon(BALLS[k].f)}" alt=""><div><b>${BALLS[k].n}</b><div class="sub">Você tem ${G.balls[k]}</div></div><button class="btn y" data-buy="${k}" ${G.gold<BALLS[k].p*10?'disabled':''}>10 por ${BALLS[k].p*10}</button></div>`;
-    h+=megaShop();h+=econShop();
-    h+=`<div class="shop win"><img src="${icon('potion')}" alt=""><div><b>Poção</b><div class="sub">Cura metade do HP. Você tem ${G.pots}</div></div><button class="btn y" data-buy="pot" ${G.gold<250?'disabled':''}>5 por 250</button></div>`}
+    h+=`<div class="shop win"><img src="${icon('potion')}" alt=""><div><b>Poção</b><div class="sub">Cura metade do HP. Você tem ${G.pots}</div></div><button class="btn y" data-buy="pot" ${G.gold<250?'disabled':''}>5 por 250</button></div>`;
+    h+=econShop();h+=megaShop()}
   if(openTab==='ajustes'){const sw=(k,l,d)=>`<div class="opt"><div><b>${l}</b><div class="sub">${d}</div></div><button class="sw" role="switch" aria-checked="${G.auto[k]}" data-auto="${k}" aria-label="${l}"></button></div>`;
     h+=`<h3>Automação</h3><div class="win" style="padding:2px 10px">`+sw('hunt','Atacar sozinho','Procura o selvagem mais perto')+sw('moves','Usar golpes sozinho','Usa os golpes especiais quando ficam prontos')+sw('throw','Lançar bola sozinho','Joga no corpo assim que ele cai')+sw('merge','Fundir repetidas sozinho','Capturas repetidas fortalecem o Pokémon da mesma linha. Shiny nunca é fundido')+sw('sound','Som','Efeitos sonoros do jogo')+sw('pot','Usar poção','Abaixo de 35% de HP')+sw('mega','Mega evoluir sozinho','Quando a energia mega enche')+sw('sp','Especial sozinho','Usa o especial em chefes e grupos grandes')+
       `<div class="opt"><div><b>Bola usada</b></div><div class="seg">${Object.keys(BALLS).map(k=>`<button class="btn" data-ball="${k}" aria-pressed="${G.auto.ball===k}" aria-label="${BALLS[k].n}"><img class="ico" src="${icon(BALLS[k].f)}" alt="">${G.balls[k]}</button>`).join('')}</div></div></div>`;
@@ -2233,6 +2303,7 @@ document.addEventListener('click',e=>{
   if(d.tab){snd('tap');return setTab(d.tab)}
   if(d.mode)return setTab(d.mode);
   if(d.mapopen){G.mapOpen=G.mapOpen===d.mapopen?'_':d.mapopen;const SB=$('sheetBody'),st=SB.scrollTop;renderSheet();SB.scrollTop=st;return}
+  if(teamClick(t,d))return;
   if(econClick(d)||gfxClick(d))return;
   if(d.mv)return castManual(d.mv);
   if(t.id==='spBtn'){useSpecial();return}
@@ -2245,7 +2316,7 @@ document.addEventListener('click',e=>{
   else if(d.up!==undefined){if(G.team.length<5){const [m]=G.depot.splice(+d.up,1);G.team.push(m);dirty=true}}
   else if(d.merge!==undefined){const m=G.depot[+d.merge],tg=m&&mergeTarget(m);if(tg){G.depot.splice(+d.merge,1);mergeInto(tg,m,false)}}
   else if(d.rare!==undefined){const m=G.team[+d.rare];if(m&&G.items.rare>0&&m.lvl<100){G.items.rare--;gainXp(m,need(m.lvl)-m.xp);toast(`${S[m.id].n} subiu para o Nv ${m.lvl}`)}}
-  else if(d.sell!==undefined){const m=G.depot[+d.sell];G.gold+=sellPrice(m);G.depot.splice(+d.sell,1);dirty=true}
+  else if(d.sell!==undefined){const m=G.depot[+d.sell];if(m)askSell([m])}
   else if(d.buy){if(d.buy==='pot'){if(G.gold>=250){G.gold-=250;G.pots+=5}}else{const b=BALLS[d.buy];if(G.gold>=b.p*10){G.gold-=b.p*10;G.balls[d.buy]+=10;noBallWarned=false}}dirty=true}
   else if(d.go){if(MODE==='arena')return toast('Saia da Arena primeiro');const [b,i]=d.go.split('|');G.biome=b;G.tier=+i;wilds=[];corpses=[];balls=[];shots=[];slashes=[];timers=[];manualTarget=null;spawnT=300;buildBG();if(me){me.x=cam+VW*.3;me.y=laneMid()}dirty=true;setTab('hunt')}
   else if(d.auto){G.auto[d.auto]=!G.auto[d.auto];dirty=true}
